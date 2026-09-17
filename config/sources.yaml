@@ -1,0 +1,84 @@
+# Source configuration.
+#
+# FreshRSS is the spine. In FreshRSS, organize feeds into Categories (or apply
+# Labels) whose names you map to newsletter section ids below. Anything pulled
+# from a category lands in the mapped section. Unmapped categories -> `default`.
+
+freshrss:
+  # FreshRSS folder name  ->  section id (sections.yaml).
+  # Keys below are the literal category names from examples/feeds.opml,
+  # which is the file to import into FreshRSS to create them. FreshRSS
+  # decodes the OPML's `&amp;` to `&` in folder names, so keys use a plain `&`.
+  # The collector tries an EXACT match first, then a tolerant one that ignores
+  # case, leading/trailing space, doubled internal spaces, and an undecoded
+  # `&amp;`. Exact always wins, so two keys differing only in case each keep
+  # their own mapping. Matching these to the OPML byte-for-byte is still the
+  # clearest thing to do; the tolerant pass is a safety net, not a licence to
+  # let them drift.
+  category_map:
+    # Risk tier -> own sections (llm_task: risk_synthesis)
+    "Risk - Cyber Threat Intel": cyber
+    "Risk - Hazard & Disaster": hazard
+    "Risk - Geopolitical & Conflict": geopolitics
+    "Risk - Aviation & Travel": aviation
+    # Signal tier -> own sections (summarize), except finance
+    "Signal - Global Health & Disease": health
+    "Signal - Healthcare Industry": healthcare
+    "Signal - Agriculture & Food": agriculture
+    "Signal - Energy": energy
+    "Signal - Supply Chain & Logistics": supply_chain
+    "Signal - Finance & Macro": finance
+    "Signal - Markets & Equities": finance
+    "Signal - Climate & Water": climate
+    # News tier
+    # Rename this key and the OPML folder together if you use a different
+    # name -- test_every_category_map_key_present_in_shipped_opml pins them.
+    "News - Local": local
+    "News - State": state
+    "News - National": national
+    "News - Politics": politics
+    "News - Global": global
+    # Tech tier (weekly sections)
+    "Tech - AI & LLMs": ai
+    "Tech - FOSS & Linux": foss
+    # Hobby / life tier (weekly sections)
+    "Hobby - Maker & Hardware": maker
+    "Hobby - Ham Radio": ham_radio
+    "Life - Literature": literature
+    "Life - Philosophy": philosophy
+    # --- PersonalRSS calm-computing layer (daily) ---
+    "News - Independent Voices": independent_voices
+    "Tech - Criticism & Power": tech_power
+    "Reporting - Investigative": investigative
+    "World - Perspectives": world
+    "World - China": china
+    "Science - Research": science
+    # --- weekly: counter-pulse, career lens, life/build ---
+    "News - Counterpoint": overton
+    "Work - Architecture & Eng Leadership": architecture
+    "Work - Strategy & Exec Comms": strategy
+    "Work - Data Science": data_science
+    "Build - Homelab & Self-Hosting": homelab
+    "Life - Outdoor & Adventure": outdoor
+    "Life - Garden & Kitchen": garden
+  # Items in categories not listed above go here:
+  default_section: global
+  # Max items to request from FreshRSS per pull (Google Reader API n= param)
+  fetch_limit: 800
+
+# Structured (non-RSS) feeds for the risk layer. usgs_earthquakes is LIVE --
+# passband/collectors/alerts.py::usgs_events reads it from here and returns []
+# silently if the key moves, so rename this block only alongside that reader.
+# The rest are listed so the config shape is settled; they are wired in a later
+# phase (--mode dashboard).
+risk:
+  usgs_earthquakes: "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson"
+  nws_alerts: "https://api.weather.gov/alerts/active"
+  reliefweb_reports: "https://api.reliefweb.int/v1/reports?appname=passband&profile=list&preset=latest"
+  gdelt_doc: "https://api.gdeltproject.org/api/v2/doc/doc"
+
+# Gap-fill via your self-hosted SearXNG + Firecrawl. Used for feedless topics
+# and the breaking-news layer. Wired in a later phase.
+gapfill:
+  searxng_url: ""     # e.g. http://localhost:8080
+  firecrawl_url: ""   # e.g. http://localhost:3002

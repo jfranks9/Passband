@@ -1,0 +1,90 @@
+name: ci
+
+# Everything here runs with no credentials and no network access to FreshRSS,
+# LiteLLM or Resend. That is deliberate: the README advertises `--mock` plus
+# `--dry-run` as a genuine zero-credential path, so CI exercises the exact thing
+# a new user's first run does. If this workflow breaks, the quickstart is wrong.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The image is 3.12; 3.11 is here to catch accidental version-locking.
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      # Guards the reason every requirement carries an upper bound: a build in
+      # six months must resolve the same majors this was tested against. An
+      # unbounded floor once pulled mcp 2.x, which renamed FastMCP to MCPServer,
+      # and the MCP server crash-looped on import with nothing in the repo changed.
+      - name: Show resolved versions
+        run: pip list --format=freeze | sort
+
+      - name: Unit tests (offline)
+        run: python -m pytest -q
+
+      - name: Smoke — seed the store with mock data
+        run: python main.py gather --mock
+
+      - name: Smoke — render an edition offline
+        run: python main.py newsletter --dry-run
+
+      - name: Assert an edition was actually written
+        run: |
+          ls -l out/newsletter-*.html
+          test -s "$(ls out/newsletter-*.html | head -1)"
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the image (not pushed)
+        run: docker build -t passband:ci .
+
+      # A CRLF shebang makes the kernel look for an interpreter literally named
+      # "/bin/sh\r", and the container exits with a misleading "no such file or
+      # directory" on a path that plainly exists. Cheap to check, hard to debug.
+      - name: Entrypoint has no CR bytes
+        run: |
+          docker run --rm --entrypoint sh passband:ci -c '
+            if grep -q "$(printf "\r")" /app/docker-entrypoint.sh; then
+              echo "CRLF line endings in docker-entrypoint.sh"; exit 1
+            fi'
+
+      # Importing server.py is what catches a dependency major bumping out from
+      # under the MCP API. This exact check would have failed the 1.3.0 build
+      # instead of letting it reach a host and crash-loop there.
+      - name: Image imports the package and the MCP server
+        run: |
+          docker run --rm --entrypoint python passband:ci \
+            -c "import passband, server; print('import ok:', server.mcp.name)"
+
+      # NOT `gather --mock` here: --mock reads tests/fixtures/sample_items.json,
+      # and the Dockerfile deliberately does not COPY tests/ into the runtime
+      # image. The mock path is covered by the `test` job against a source
+      # checkout, which is where it is documented to work.
+      #
+      # Against an empty store this exits 0 with "no due sections had content" —
+      # which still exercises config loading, cadence evaluation and the SQLite
+      # store inside the real image, with no credentials and no network.
+      - name: Image runs the pipeline with no credentials
+        run: |
+          docker run --rm --entrypoint python passband:ci /app/main.py newsletter --dry-run

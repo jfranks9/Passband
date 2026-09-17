@@ -1,0 +1,23 @@
+# Normalize line endings on commit.
+#
+# `* text=auto` alone normalizes the index but still checks out CRLF on Windows.
+# That is not cosmetic here: a CRLF shebang in docker-entrypoint.sh makes the
+# kernel look for an interpreter literally named "/bin/sh\r", and the container
+# exits with a misleading "no such file or directory". `eol=lf` pins the working
+# tree too, so a Windows checkout cannot reintroduce it.
+#
+# This file does not exist upstream — it is excluded from the publish manifest as
+# dev-side tooling — so it has to live here on its own. Without it, a Windows
+# clone of the upstream repo checks out CRLF and the first commit here would bake
+# a broken entrypoint into history.
+* text=auto eol=lf
+
+*.sh       text eol=lf
+*.py       text eol=lf
+*.yaml     text eol=lf
+*.yml      text eol=lf
+*.opml     text eol=lf
+*.md       text eol=lf
+*.html     text eol=lf
+*.json     text eol=lf
+Dockerfile text eol=lf

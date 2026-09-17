@@ -1,0 +1,30 @@
+# Every entry carries an upper bound. Unbounded floors mean the image you build
+# in six months is not the image you tested, and the failure surfaces at deploy
+# time on a host you are not watching.
+#
+# This is not hypothetical: 1.3.0 shipped with mcp 2.x, which renamed FastMCP to
+# MCPServer and moved the module, so the MCP server crash-looped on import. Nothing in
+# the repo changed — only the resolution of `mcp>=1.2` did.
+
+requests>=2.31,<3
+PyYAML>=6.0,<7
+python-dotenv>=1.0,<2
+feedparser>=6.0,<7
+
+# Exact, not a ceiling. Clustering output is load-bearing and a minor bump can
+# change TF-IDF grouping with nothing failing — a quietly worse newsletter rather
+# than an error. Bump this deliberately and check a rendered edition against the
+# golden before accepting it.
+scikit-learn==1.7.2
+
+jinja2>=3.1,<4
+
+# curate.py uses OpenAI(base_url=, api_key=) and chat.completions.create(); that
+# surface survives 3.x, but the ceiling stops a 4.x from arriving unannounced.
+openai>=1.30,<4
+
+# Pinned BACKWARDS on purpose. server.py is v1 API (mcp.server.fastmcp.FastMCP).
+# mcp 2.x renamed it to MCPServer with other API changes; migrating is a
+# deliberate piece of work, not something to absorb as a side effect of a
+# rebuild. See https://py.sdk.modelcontextprotocol.io/v2/migration/
+mcp>=1.2,<2

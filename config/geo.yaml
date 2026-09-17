@@ -1,0 +1,38 @@
+# Config-driven geography. Nothing location-specific is hardcoded in source —
+# and nothing location-specific belongs in this file either.
+#
+# This file ships with placeholders only. Your actual location is deployment
+# data, not repository data: set it in the environment (.env locally, stack env
+# in production) so it never lands in a commit.
+#
+#   PASSBAND_FORECAST_POINT="<lat>,<lon>"
+#   PASSBAND_BBOX="<min_lon>,<min_lat>,<max_lon>,<max_lat>"
+#   PASSBAND_LOCAL_TERMS="County One, County Two"   # see config/alerts.yaml
+#
+# Env wins over anything written here. A malformed env value is ignored with a
+# log line and this file's value stands, so a typo can never break a send.
+
+location:
+  city: "<YOUR_CITY>"        # not yet required by any collector
+  county: "<YOUR_COUNTY>"    # see also alerts.yaml local_terms
+  metro: "<YOUR_METRO>"
+  state: "<YOUR_STATE>"
+  state_abbr: "<XX>"
+  country: "US"
+
+# Free-text query fragments injected into gap-fill searches per layer.
+layers:
+  local: "<YOUR_CITY>"
+  area: "<YOUR_METRO> OR <YOUR_METRO_ABBR>"
+  state: "<YOUR_STATE>"
+
+# Bounding box for filtering geo-tagged events (USGS quakes) to your
+# region: [min_lon, min_lat, max_lon, max_lat]. Empty = no regional filter, so
+# only the global magnitude threshold applies. Set PASSBAND_BBOX instead of
+# filling this in.
+bbox: []
+
+# [lat, lon] for the daily NWS forecast line in the email header. Empty = no
+# forecast line (the collector returns None before making any request). Set
+# PASSBAND_FORECAST_POINT instead of filling this in.
+forecast_point: []

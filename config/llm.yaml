@@ -1,0 +1,15 @@
+# LiteLLM is OpenAI-compatible, so the curator talks to one endpoint and routes
+# per task to whichever model you've configured in your LiteLLM proxy.
+# base_url / api_key come from .env (LITELLM_BASE_URL, LITELLM_API_KEY).
+
+# task name -> model name as registered in your LiteLLM proxy
+task_models:
+  summarize: "fast"        # small/quick proxy model for plain section briefs
+  risk_synthesis: "large"  # larger proxy model for risk second-order synthesis
+
+defaults:
+  temperature: 0.2
+  max_tokens: 900
+  # Per-cluster character budget for the snippet text sent to the model.
+  # Keeps token cost bounded regardless of source article length.
+  cluster_snippet_chars: 600

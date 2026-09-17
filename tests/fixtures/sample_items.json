@@ -1,0 +1,58 @@
+[
+  {
+    "title": "Major earthquake strikes coastal region, tsunami advisory issued",
+    "url": "https://example.com/a1?utm_source=x",
+    "summary": "A magnitude 6.8 earthquake struck offshore early Monday, prompting a tsunami advisory and evacuations of low-lying coastal towns. Officials report power outages affecting tens of thousands.",
+    "section": "hazard",
+    "source_title": "Wire Service",
+    "age_hours": 5
+  },
+  {
+    "title": "6.8 quake off the coast triggers tsunami warning",
+    "url": "https://other.com/quake",
+    "summary": "Seismologists recorded a strong offshore earthquake; a tsunami advisory was issued for coastal communities. Local emergency services activated shelters.",
+    "section": "hazard",
+    "source_title": "Regional Daily",
+    "age_hours": 4
+  },
+  {
+    "title": "Port congestion worsens as dockworker talks stall",
+    "url": "https://example.com/port",
+    "summary": "Negotiations between port operators and the dockworkers union broke down, raising fears of shipping delays and downstream supply shortages heading into peak season.",
+    "section": "supply_chain",
+    "source_title": "Trade Journal",
+    "age_hours": 9
+  },
+  {
+    "title": "Central bank holds rates steady amid mixed signals",
+    "url": "https://example.com/fed",
+    "summary": "The central bank kept its benchmark rate unchanged, citing cooling inflation but a resilient labor market. Markets rallied modestly on the decision.",
+    "section": "finance",
+    "source_title": "Markets Wire",
+    "age_hours": 6
+  },
+  {
+    "title": "Open-source model release claims efficiency gains",
+    "url": "https://example.com/llm",
+    "summary": "A new open-weight language model was released under a permissive license, with benchmarks suggesting strong performance at smaller parameter counts and lower inference cost.",
+    "section": "ai",
+    "source_title": "AI Newsletter",
+    "age_hours": 20
+  },
+  {
+    "title": "New permissive-license LLM lands with benchmark wins",
+    "url": "https://other.com/llm2",
+    "summary": "The open-weights release drew attention for efficiency, posting competitive scores while running on commodity hardware. Community fine-tunes appeared within hours.",
+    "section": "ai",
+    "source_title": "Dev Blog",
+    "age_hours": 18
+  },
+  {
+    "title": "Hobbyists report long-distance contacts during band opening",
+    "url": "https://example.com/ham",
+    "summary": "Amateur radio operators logged unusual long-distance HF contacts during a propagation opening tied to recent solar activity. Several shared logs and antenna setups.",
+    "section": "ham_radio",
+    "source_title": "QRZ Forums",
+    "age_hours": 40
+  }
+]

@@ -1,0 +1,70 @@
+# Alert / breakthrough layer. Renders a top "Alerts" section in the daily
+# email whenever something crosses a threshold — independent of section
+# cadence. This is the layer that catches the tropical-depression case: an
+# event no scheduled section happened to surface.
+#
+# Two inputs, both deterministic (no LLM):
+#   structured — USGS + NWS APIs polled at newsletter time, hard thresholds.
+#   watchlist  — keyword rules over items already gathered from FreshRSS.
+# Each alert renders once (tracked in sent_log under section id 'alerts').
+
+enabled: true
+max_items: 6            # cap per issue; highest severity first
+
+structured:
+  usgs:
+    # Feed URL comes from sources.yaml -> risk.usgs_earthquakes.
+    min_magnitude_global: 6.0     # anywhere in the world
+    min_magnitude_regional: 3.5   # within geo.yaml bbox (felt-at-home range)
+  nws:
+    area: "TX"
+    # Extreme-severity alerts (Tornado Emergency, Flash Flood Emergency,
+    # Hurricane Warning...) always alert, statewide.
+    severities_statewide: ["Extreme"]
+    # These event types alert statewide regardless of severity — tropical
+    # systems matter before they are local.
+    events_statewide:
+      - "Hurricane Warning"
+      - "Hurricane Watch"
+      - "Tropical Storm Warning"
+      - "Tropical Storm Watch"
+      - "Storm Surge Warning"
+    # These only alert when the affected area mentions a local_terms match
+    # (statewide TX would otherwise fire for every spring storm in the Panhandle).
+    events_local:
+      - "Tornado Warning"
+      - "Flash Flood Warning"
+      - "Blizzard Warning"
+      - "Ice Storm Warning"
+      - "Extreme Heat Warning"
+    # Placeholders. Set PASSBAND_LOCAL_TERMS to your real counties/place names.
+    # FAILS CLOSED: if neither this nor the env var names a place that appears in
+    # the NWS areaDesc, the events_local list above never fires and you get only
+    # statewide/extreme alerts. Silence here looks identical to "no warnings".
+    local_terms: ["<YOUR_COUNTY>", "<YOUR_COUNTY_2>"]
+
+watchlist:
+  lookback_hours: 30
+  # Rules with `near: true` must ALSO match one of these geo terms.
+  # Placeholders. Set PASSBAND_GEO_TERMS to your state/metro/grid-operator terms.
+  # FAILS CLOSED the same way: every rule below marked `near: true` is skipped
+  # when none of these appears in the item text.
+  geo_terms: ["<YOUR_STATE>", "<YOUR_METRO>"]
+  rules:
+    - name: tropical
+      any: ["tropical depression", "tropical storm", "hurricane watch",
+            "hurricane warning", "storm surge", "makes landfall"]
+    - name: severe-weather-local
+      near: true
+      any: ["tornado warning", "tornado emergency", "flash flood emergency",
+            "ice storm", "blizzard", "grid emergency", "rolling blackout"]
+    - name: infrastructure-local
+      near: true
+      any: ["boil water", "shelter in place", "state of emergency",
+            "water main", "gas leak evacuation"]
+    - name: aviation-major
+      any: ["fatal crash", "mid-air collision", "hull loss", "ground stop",
+            "fleet grounded", "airspace closed"]
+    - name: cyber-critical
+      any: ["actively exploited", "exploited in the wild", "emergency patch",
+            "cisa kev", "critical rce"]
